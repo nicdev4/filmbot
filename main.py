@@ -5,7 +5,7 @@ import telebot
 import ast
 
 
-token = "5775482246:AAFoL2J2e2MGUBNvkkwE28vScOcmtIW7XV4"
+token = ""
 
 bot = telebot.TeleBot(token=token)
 types = telebot.types;
