@@ -1,4 +1,9 @@
+import json
+import urllib
+import requests
 import telebot
+import ast
+
 
 token = "5775482246:AAFoL2J2e2MGUBNvkkwE28vScOcmtIW7XV4"
 
@@ -22,7 +27,20 @@ def reply(message):
     if(admins.__contains__(id)):
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("Open google", url="https://google.com"))
-        bot.send_message(id, replaceEmojies(":heart: :makaka: test"), reply_markup=markup)
+        raw_request = requests.get("https://api.kinopoisk.dev/movie",
+                                    params={'token': '',
+                                            'search': '7-10',
+                                            'field': 'rating.kp',
+                                            'search': '2012-2022',
+                                            'field': 'year',
+                                            'inStrict': 'false',
+                                            'limit': '1'}
+                                   )
+        film_data = json.loads(raw_request.text)['docs']
+        rating = film_data[0]['rating']
+        bot.send_photo(id, urllib.request.urlopen(film_data[0]['poster']['url']).read())
+        bot.send_message(id, "Фильм "+str(film_data[0]['name'])+"\nОценки kinopoisk "+str(rating['kp'])+" | IMDB "+str(rating['imdb'])+"\n"+"",
+                         reply_markup=markup)
     else:
         bot.send_message(id, "Бот временно недоступен ;(")
 
