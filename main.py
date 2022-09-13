@@ -28,7 +28,7 @@ def reply(message):
         markup = types.InlineKeyboardMarkup()
         markup.add(types.InlineKeyboardButton("Open google", url="https://google.com"))
         raw_request = requests.get("https://api.kinopoisk.dev/movie",
-                                    params={'token': '',
+                                    params={'token': ' ',
                                             'search': '7-10',
                                             'field': 'rating.kp',
                                             'search': '2012-2022',
