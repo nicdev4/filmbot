@@ -5,7 +5,7 @@ import telebot
 import ast
 from kinopoisk.movie import Movie
 
-token = ""
+token = " "
 
 bot = telebot.TeleBot(token=token)
 types = telebot.types;
