@@ -5,7 +5,8 @@ import telebot
 import ast
 from kinopoisk.movie import Movie
 
-token = " "
+token = ""
+api_token = ""
 
 bot = telebot.TeleBot(token=token)
 types = telebot.types;
@@ -14,6 +15,9 @@ admins = [831107251]
 
 search = types.InlineKeyboardMarkup()
 search.add(types.InlineKeyboardButton("Поиск фильма", callback_data="search"))
+
+mainmenu = types.ReplyKeyboardMarkup()
+mainmenu.add(types.MenuButton("Посоветуйте мне фильм"))
 
 useractions = {}
 temp = {}
@@ -38,11 +42,11 @@ def reply(message):
                 raw_year = text
                 if isInt(raw_year) or (len(raw_year.split("-", 2)) >= 2) and (isInt(raw_year.split("-", 2)[0] and isInt(raw_year.split("-", 2)[1]))):
                     raw_request = requests.get("https://api.kinopoisk.dev/movie",
-                                               params={'token': '',
+                                               params={'token': api_token,
                                                        'search': str(query),
                                                        'page': 1,
                                                        'field': 'name',
-                                                        'limit': 20,
+                                                        'limit': 25,
                                                        'sortField[]': 'votes.kp',
                                                        'sortField[]': 'premiere.world',
                                                        'sortType[]': -1,
@@ -96,7 +100,7 @@ def query(call):
     elif(str(data).startswith("f:")):
         data = data[-(len(data)-2)::]
         raw_request = requests.get("https://api.kinopoisk.dev/movie",
-                                   params={'token': '34SFDK9-M71MT5N-H9F4G77-AR9YTX8',
+                                   params={'token': api_token,
                                            'search': data,
                                            'field': 'id',
                                            'inStrict': 'true',
