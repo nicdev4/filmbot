@@ -2,11 +2,12 @@ import json
 import urllib
 import requests
 import telebot
+import kinopoiskapi
 import ast
 import datetime
 
 token = ""
-api_token = ""
+kinopoisk = kinopoiskapi.KinopoiskAPI(token="")
 
 bot = telebot.TeleBot(token=token)
 types = telebot.types;
@@ -84,41 +85,18 @@ def reply(message):
     if(admins.__contains__(id)):
         if(useractions.__contains__(id)):
             if(str(useractions[id]).__eq__("search")):
-                raw_request = requests.get("https://api.kinopoisk.dev/movie",
-                                           params={'token': api_token,
-                                                   'search': str(text),
-                                                   'page': 1,
-                                                   'field': "name",
-                                                   'limit': 25,
-                                                   'sortField[]': 'votes.kp',
-                                                   'sortField[]': 'premiere.world',
-                                                   'sortType[]': -1,
-                                                   'sortType[]': -1,
-                                                   'isStrict': 'false'
-                                                   }
-                                           )
-
-                print(raw_request.text)
-                if raw_request.status_code == 200:
-                    print(raw_request.text)
-                    if (raw_request.text.__eq__('{"docs":[],"total":0,"limit":1,"page":1,"pages":1}')):
-                        bot.send_message(id, "По вашему запросу ничего не найдено.", reply_markup=search)
-                    else:
-                        film_data = json.loads(raw_request.text)['docs']
-                        markup = types.InlineKeyboardMarkup()
-                        for film in film_data:
-                            name = film['name']
-                            if name == None: name = str(film['alternativeName']) + " (англ.)";
-                            markup.add(types.InlineKeyboardButton(str(name) + " (" + str(film['year']) + ")",
-                                                                  callback_data="f:" + str(film['id'])))
-                        bot.send_message(id, "Найдено по вашему запросу", reply_markup=markup)
+                film = kinopoisk.searchFilms(text=text)
+                if (film.text.__eq__('{"docs":[],"total":0,"limit":1,"page":1,"pages":1}') or film.text.__eq__('{}')):
+                    bot.send_message(id, "По вашему запросу ничего не найдено.", reply_markup=search)
                 else:
-                    bot.send_message(id, "Ошибка. Разработчики бота уже уведомлены.")
-                    for admin in admins:
-                        bot.send_message(admin,
-                                         "Ошибка выполнения запроса для пользователя " + str(
-                                             id) + ": Status code " + str(
-                                             raw_request.status_code))
+                    film_data = json.loads(film.text)['docs']
+                    markup = types.InlineKeyboardMarkup()
+                    for f in film_data:
+                        name = f['name']
+                        if name == None: name = str(f['alternativeName']) + " (англ.)";
+                        markup.add(types.InlineKeyboardButton(str(name) + " (" + str(f['year']) + ")",
+                                                              callback_data="f:" + str(f['id'])))
+                    bot.send_message(id, "Найдено по вашему запросу", reply_markup=markup)
                 useractions.pop(id)
         elif(text.__eq__("/start")):
             bot.send_message(id, "Добро пожаловать в FilmBot. Это бот, который позволяет вам искать свежие фильмы, а также советует вам, что посмотреть.\n Идентификатор "+str(id), reply_markup=mainmenu)
@@ -144,13 +122,7 @@ def query(call):
 
     elif (str(data).startswith("t:")):
         data = data[-(len(data) - 2)::]
-        raw_request = requests.get("https://api.kinopoisk.dev/movie",
-                                   params={'token': api_token,
-                                           'search': data,
-                                           'field': 'id',
-                                           'inStrict': 'true',
-                                           'limit': '1'}
-                                   )
+        raw_request = kinopoisk.getFilmByID(id=data)
         if raw_request.status_code == 200:
             if (raw_request.text.__eq__('{"docs":[],"total":0,"limit":1,"page":1,"pages":1}')):
                 bot.send_message(id, "Не удалось открыть фильм ;(")
@@ -179,13 +151,7 @@ def query(call):
             bot.send_message(id, "Не удалось найти фильм.")
     elif(str(data).startswith("f:")):
         data = data[-(len(data)-2)::]
-        raw_request = requests.get("https://api.kinopoisk.dev/movie",
-                                   params={'token': api_token,
-                                           'search': data,
-                                           'field': 'id',
-                                           'inStrict': 'true',
-                                           'limit': '1'}
-                                   )
+        raw_request = kinopoisk.getFilmByID(id=data)
         if raw_request.status_code == 200:
             if (raw_request.text.__eq__('{"docs":[],"total":0,"limit":1,"page":1,"pages":1}')):
                 bot.send_message(id, "Не удалось открыть фильм ;(")
