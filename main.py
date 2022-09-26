@@ -206,19 +206,7 @@ def query(call):
         data = data[-(len(data) - 3)::]
         print(data)
         if(genres.__contains__(data)):
-            raw_request = requests.get("https://api.kinopoisk.dev/movie",
-                                       params={'token': api_token,
-                                               'search': str(genres[data]),
-                                               'page': 1,
-                                               'field': "genres.name",
-                                               'limit': 1,
-                                               'sortField[]': 'votes.kp',
-                                               'sortField[]': 'premiere.world',
-                                               'sortType[]': -1,
-                                               'sortType[]': -1,
-                                               'isStrict': 'false'
-                                               }
-                                       )
+            raw_request = kinopoisk.getFilmByID(genres['data'])
 
             print(raw_request.text)
             message = ""

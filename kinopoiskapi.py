@@ -33,3 +33,17 @@ class KinopoiskAPI():
             return raw_request
         else:
             return {}
+    def getFilmsByGenres(self, genres = {}):
+        requests.get("https://api.kinopoisk.dev/movie",
+                     params={'token': self.token,
+                             'search': str(genres),
+                             'page': 1,
+                             'field': "genres.name",
+                             'limit': 1,
+                             'sortField[]': 'votes.kp',
+                             'sortField[]': 'premiere.world',
+                             'sortType[]': -1,
+                             'sortType[]': -1,
+                             'isStrict': 'false'
+                             }
+                     )
